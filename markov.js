@@ -1,3 +1,5 @@
+'use strict';
+
 /** Textual markov chain generator. */
 
 
@@ -39,8 +41,12 @@ class MarkovMachine {
     * once we have the complete choice obj, we return it
     *  */
 
-    // !this.words[i + 1]
+    //TODO: more specific var name => chains
     const choices = {};
+
+    //TODO: keep it simple => for...loop
+    //TODO: make var for this.words
+    //TODO: easier logic => look at next work and if nothing's there, set to null
 
     for (let [i, phrase] of this.words.entries()) {
       if (i === this.words.length - 1) {
@@ -67,13 +73,62 @@ class MarkovMachine {
    *  until it hits a null choice. */
 
   getText() {
-    // TODO: implement this!
 
     // - start at the first word in the input text
     // - find a random word from the following-words of that
     // - repeat until reaching the terminal null
 
-    //this.chains
+    /**
+     * call getChains function => this.chains to get random words
+     * always starting with first word for input text
+     * look inside chains to see if there's a key in chains that matches the first word
+     * if yes, pull out arr and randomly select a word in arr
+     * add random word to result string
+     * result string should now start with added random word
+     * random word becomes the next key in choices that we are looking for
+     * look for key in choices, randomly choose another word, add random word to result string and that word becomes the focus of the next interation
+     * repeat process until we hit null
+     */
+
+    //TODO: appending string => make into arr instead of creating new strings
+    // can use lodash to get random word
+
+    let randomText = '';
+
+    //TODO: don't need var just be explicit
+    const chains = this.chains;
+    // let idx = 0;
+
+    //TODO: sep of concerns => make new function to pick a random word
+    let randomWord;
+
+    while (randomWord !== null) {
+      //TODO: repeating logic on line 120; 121
+      if (!randomText) {
+        randomWord = this.words[0];
+        randomText += randomWord + ' ';
+        // idx++;
+      }
+
+      if (randomText) {
+        //TODO: don't need to loop every key
+        for (let key in chains) {
+          //TODO: can access key in obj w/o looping
+          if (randomWord === key) {
+            let randomWordIdx = Math.floor(
+              Math.random() * chains[key].length);
+
+            randomWord = chains[key][randomWordIdx];
+
+            if (randomWord !== null) {
+              randomText += randomWord + ' ';
+            }
+          }
+        }
+      }
+    }
+
+    return randomText;
   }
 }
 let machine = new MarkovMachine("The cat in the hat. The cat is the hat.");
