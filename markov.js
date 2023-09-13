@@ -41,33 +41,31 @@ class MarkovMachine {
     * once we have the complete choice obj, we return it
     *  */
 
-    //TODO: more specific var name => chains
-    const choices = {};
+    const chains = {};
+    const words = this.words;
+    // easier logic => look at next word and if nothing's there, set to null
 
-    //TODO: keep it simple => for...loop
-    //TODO: make var for this.words
-    //TODO: easier logic => look at next work and if nothing's there, set to null
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      const nextWord = words[i + 1] || null;
 
-    for (let [i, phrase] of this.words.entries()) {
-      if (i === this.words.length - 1) {
-        if (phrase in choices) {
-          choices[phrase].push(null);
-        }
-        else {
-          choices[phrase] = [null];
-        }
-      }
-      else if (!(phrase in choices)) {
-        choices[phrase] = [this.words[i + 1]];
+      if (word in chains) {
+        chains[word].push(nextWord);
       }
       else {
-        choices[phrase].push(this.words[i + 1]);
+        chains[word] = [nextWord];
       }
     }
 
-    return choices;
+    return chains;
   }
 
+  /** Pick random choice from array */
+
+  static choice(arr) {
+    // sep of concerns => make new function to pick a random word
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
 
   /** Return random text from chains, starting at the first word and continuing
    *  until it hits a null choice. */
@@ -90,47 +88,32 @@ class MarkovMachine {
      * repeat process until we hit null
      */
 
-    //TODO: appending string => make into arr instead of creating new strings
+    // appending string => make into arr instead of creating new strings
     // can use lodash to get random word
+    // can access key in obj w/o looping
 
-    let randomText = '';
+    let randomText = [];
+    let key = this.words[0];
 
-    //TODO: don't need var just be explicit
-    const chains = this.chains;
-    // let idx = 0;
-
-    //TODO: sep of concerns => make new function to pick a random word
-    let randomWord;
-
-    while (randomWord !== null) {
-      //TODO: repeating logic on line 120; 121
-      if (!randomText) {
-        randomWord = this.words[0];
-        randomText += randomWord + ' ';
-        // idx++;
-      }
-
-      if (randomText) {
-        //TODO: don't need to loop every key
-        for (let key in chains) {
-          //TODO: can access key in obj w/o looping
-          if (randomWord === key) {
-            let randomWordIdx = Math.floor(
-              Math.random() * chains[key].length);
-
-            randomWord = chains[key][randomWordIdx];
-
-            if (randomWord !== null) {
-              randomText += randomWord + ' ';
-            }
-          }
-        }
-      }
+    while (key !== null) {
+      const { word, nextKey } = this.getOneLink(key);
+      randomText.push(word);
+      key = nextKey;
     }
 
-    return randomText;
+    return randomText.join(' ');
+  }
+
+  /** Get a single link: the next word and next key */
+
+  getOneLink(key) {
+    return {
+      word: key,
+      nextKey: MarkovMachine.choice(this.chains[key]),
+    };
   }
 }
+
 let machine = new MarkovMachine("The cat in the hat. The cat is the hat.");
 
 module.exports = {
